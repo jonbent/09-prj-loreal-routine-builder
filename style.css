@@ -79,6 +79,9 @@ body {
   overflow-y: auto;
   background: #fafafa;
   margin-bottom: 20px;
+
+  display: flex;
+  flex-direction: column;
 }
 
 /* placeholder message */
@@ -181,12 +184,66 @@ body {
 .product-card {
   flex: 0 1 calc(33.333% - 14px);
   border: 1px solid #ccc;
-  padding: 15px;
   border-radius: 4px;
   display: flex;
   gap: 15px;
   min-height: 160px;
+  margin: 40px 0;
+  padding: 20px;
+  cursor: pointer;
+  position: relative;
+  overflow: visible;
 }
+/* Adjusted Tooltip Positioning */
+.product-card .description-tooltip {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 8px); /* Reduced the gap to 8px */
+  width: 250px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 12px;
+  padding: 10px;
+  border-radius: 5px;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Adjust tooltip for left position */
+.product-card[data-tooltip-position="left"] .description-tooltip {
+  left: auto;
+  right: calc(100% + 8px); /* Reduced gap to 8px */
+}
+
+/* Hover effect to display tooltip */
+.product-card:hover .description-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Tooltip Arrow */
+.product-card .description-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -5px; /* Arrow pointing left */
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 5px;
+  border-color: transparent rgba(0, 0, 0, 0.8) transparent transparent;
+  transform: translateY(-50%);
+}
+
+.product-card[data-tooltip-position="left"] .description-tooltip::after {
+  left: auto;
+  right: -5px; /* Arrow pointing right */
+  border-color: transparent transparent transparent rgba(0, 0, 0, 0.8);
+}
+
 
 .product-card img {
   width: 110px;
@@ -252,4 +309,68 @@ body {
 
 .generate-btn i {
   margin-right: 8px;
+}
+
+div.bot-response{
+  background-color: #000000;
+  margin-right: 5rem;
+  color: #ffffff;
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+div.user-response{
+  background-color: #ff0038;
+  align-self: end;
+  margin-left: 5rem;
+}
+
+.user-response, .bot-response{
+  position: relative;
+  margin: 10px;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.bot-response::after{
+  content: "";
+  position: absolute;
+  bottom: -0.5rem;
+  left: 1rem;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 10px 10px 0 10px;
+  border-color: #000000 transparent transparent transparent;
+}
+
+.user-response::after{
+  content: "";
+  position: absolute;
+  bottom: -0.5rem;
+  right: 1rem;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 10px 10px 0 10px;
+  border-color: #ff0038 transparent transparent transparent;
+}
+
+.bot-response ol,
+.bot-response ul {
+  list-style-position: inside;
+  padding-left: 0;
+  margin: 0;
+}
+
+.bot-response li {
+  text-indent: -1em;
+  margin-left: 1em;
+}
+
+.bot-response li > p {
+  display: inline;
+  margin: 0;
 }
