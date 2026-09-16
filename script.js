@@ -1,7 +1,9 @@
 /* Get references to DOM elements */
 const categoryFilter = document.getElementById("categoryFilter");
 const productsContainer = document.getElementById("productsContainer");
-const selectedProductsContainer = document.getElementById("selectedProductsList");
+const selectedProductsContainer = document.getElementById(
+  "selectedProductsList",
+);
 const chatForm = document.getElementById("chatForm");
 const chatWindow = document.getElementById("chatWindow");
 const userInput = document.getElementById("userInput");
@@ -18,9 +20,8 @@ const openAiUrl = "https://loreal-chat-bot.jnbent.workers.dev/";
 
 let previousResponseId = null;
 
-const selectedProducts = JSON.parse(localStorage.getItem("selectedProducts")) || {};
-
-
+const selectedProducts =
+  JSON.parse(localStorage.getItem("selectedProducts")) || {};
 
 const instructions = `
 You are a helpful and knowledgeable assistant for L’Oréal. You can:
@@ -88,73 +89,77 @@ const addAttributes = (product, element) => {
   });
 };
 
-const handleSelectedProductClick = (productId, el) =>{
-  const productEl = productsContainer.querySelector(`[data-product-id="${productId}"]`);
-  if (productEl)
-    productEl.classList.remove("selected-products")
+const handleSelectedProductClick = (productId, el) => {
+  const productEl = productsContainer.querySelector(
+    `[data-product-id="${productId}"]`,
+  );
+  if (productEl) productEl.classList.remove("selected-products");
   delete selectedProducts[productId];
-  localStorage.setItem("selectedProducts", JSON.stringify(selectedProducts))
+  localStorage.setItem("selectedProducts", JSON.stringify(selectedProducts));
   el.remove();
-}
+};
 
 /* Create HTML for displaying product cards */
 function displayProducts(products) {
-  const productEls = products
-    .map(
-      (product) => {
-          const productEl = document.createElement("div");
-          if (product.id in selectedProducts) productEl.classList.add("selected-products")
-          addAttributes(product, productEl);
-          productEl.addEventListener("click", (e) => {
-            if (productEl.classList.contains("selected-products")) {
-              productEl.classList.remove("selected-products");
-              delete selectedProducts[productEl.dataset.productId];
-                localStorage.setItem("selectedProducts", JSON.stringify(selectedProducts))
-            } else {
-              productEl.classList.add("selected-products");
-              selectedProducts[productEl.dataset.productId] = {
-                id: productEl.dataset.productId,
-                name: productEl.dataset.productName,
-                image: productEl.dataset.productImage,
-                brand: productEl.dataset.productBrand,
-                category: productEl.dataset.productCategory,
-                description: productEl.dataset.productDescription
-              };
-              localStorage.setItem("selectedProducts", JSON.stringify(selectedProducts))
-              const selectedProductEl = document.createElement("div");
-              addAttributes(product, selectedProductEl);
-              selectedProductEl.addEventListener("click", () => handleSelectedProductClick(product.id, selectedProductEl))
-              selectedProductsContainer.appendChild(selectedProductEl);
-            }
-          })
-        return productEl;
+  const productEls = products.map((product) => {
+    const productEl = document.createElement("div");
+    if (product.id in selectedProducts)
+      productEl.classList.add("selected-products");
+    addAttributes(product, productEl);
+    productEl.addEventListener("click", (e) => {
+      if (productEl.classList.contains("selected-products")) {
+        productEl.classList.remove("selected-products");
+        delete selectedProducts[productEl.dataset.productId];
+        localStorage.setItem(
+          "selectedProducts",
+          JSON.stringify(selectedProducts),
+        );
+      } else {
+        productEl.classList.add("selected-products");
+        selectedProducts[productEl.dataset.productId] = {
+          id: productEl.dataset.productId,
+          name: productEl.dataset.productName,
+          image: productEl.dataset.productImage,
+          brand: productEl.dataset.productBrand,
+          category: productEl.dataset.productCategory,
+          description: productEl.dataset.productDescription,
+        };
+        localStorage.setItem(
+          "selectedProducts",
+          JSON.stringify(selectedProducts),
+        );
+        const selectedProductEl = document.createElement("div");
+        addAttributes(product, selectedProductEl);
+        selectedProductEl.addEventListener("click", () =>
+          handleSelectedProductClick(product.id, selectedProductEl),
+        );
+        selectedProductsContainer.appendChild(selectedProductEl);
       }
-    )
-    productsContainer.replaceChildren(...productEls);
+    });
+    return productEl;
+  });
+  productsContainer.replaceChildren(...productEls);
 }
 
 const fetchRoutineResponse = async (inputVal) => {
-    const response = await fetch(openAiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      },
-      body: JSON.stringify({
-        previous_response_id: previousResponseId,
-        instructions,
-        model: "gpt-4o",
-        input: inputVal,
-        tools: [{"type": "web_search_preview"}]
-      })
-    })
+  const response = await fetch(openAiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      previous_response_id: previousResponseId,
+      instructions,
+      model: "gpt-4o",
+      input: inputVal,
+      tools: [{ type: "web_search_preview" }],
+    }),
+  });
 
-    const openAiData = await response.json();
-    previousResponseId = openAiData.id;
-    return openAiData.output.find(el => el.type === "message").content[0].text;
-}
+  const openAiData = await response.json();
+  previousResponseId = openAiData.id;
+  return openAiData.output.find((el) => el.type === "message").content[0].text;
+};
 
 /* Filter and display products when category changes */
 categoryFilter.addEventListener("change", async (e) => {
@@ -164,22 +169,21 @@ categoryFilter.addEventListener("change", async (e) => {
   /* filter() creates a new array containing only products
      where the category matches what the user selected */
   const filteredProducts = products.filter(
-    (product) => product.category === selectedCategory
+    (product) => product.category === selectedCategory,
   );
 
   displayProducts(filteredProducts);
-  document.querySelectorAll(".product-card").forEach(el => {
-    el.addEventListener("click", () => {
-    })
-  })
+  document.querySelectorAll(".product-card").forEach((el) => {
+    el.addEventListener("click", () => {});
+  });
 });
 
 let secondsLoading = 0;
 const loadingPeriods = (element) => {
   secondsLoading += 1;
   const period = ".";
-  element.innerHTML = "Loading"+ period.repeat(secondsLoading % 4);
-}
+  element.innerHTML = "Loading" + period.repeat(secondsLoading % 4);
+};
 
 const addAiResponse = async (inputText) => {
   const newAiResponseElement = document.createElement("div");
@@ -189,18 +193,17 @@ const addAiResponse = async (inputText) => {
   chatWindow.appendChild(newAiResponseElement);
   chatWindow.scrollTop = chatWindow.scrollHeight;
   try {
-    const newAiResponse= await fetchRoutineResponse(inputText)
+    const newAiResponse = await fetchRoutineResponse(inputText);
     clearInterval(interval);
     secondsLoading = 0;
     newAiResponseElement.innerHTML = marked.parse(newAiResponse);
-
   } catch (error) {
-    alert("Unable to connect to the OpenAI API. Please try again later.")
+    alert("Unable to connect to the OpenAI API. Please try again later.");
     clearInterval(interval);
     secondsLoading = 0;
     newAiResponseElement.remove();
   }
-}
+};
 
 /* Chat form submission handler - placeholder for OpenAI integration */
 chatForm.addEventListener("submit", async (e) => {
@@ -213,22 +216,26 @@ chatForm.addEventListener("submit", async (e) => {
   chatWindow.appendChild(userRequest);
   chatWindow.scrollTop = chatWindow.scrollHeight;
   await addAiResponse(uInput);
-})
+});
 
-generateRoutineButton.addEventListener("click", async e => {
-
-  const responseText = "Generate a beauty routine based on the given products, the will be given in the format of name; brand; category; description: " + Object.values(selectedProducts).map((p, idx) => {
-    return `${idx + 1}. ${p.name}; ${p.brand}; ${p.category}; ${p.description}`
-  }).join(" ")
-  await addAiResponse(responseText)
-})
+generateRoutineButton.addEventListener("click", async (e) => {
+  const responseText =
+    "Generate a beauty routine based on the given products, the will be given in the format of name; brand; category; description: " +
+    Object.values(selectedProducts)
+      .map((p, idx) => {
+        return `${idx + 1}. ${p.name}; ${p.brand}; ${p.category}; ${p.description}`;
+      })
+      .join(" ");
+  await addAiResponse(responseText);
+});
 
 document.addEventListener("DOMContentLoaded", () => {
-  Object.values(selectedProducts).forEach(p => {
+  Object.values(selectedProducts).forEach((p) => {
     const productEl = document.createElement("div");
     addAttributes(p, productEl);
-    productEl.addEventListener("click", () => handleSelectedProductClick(p.id, productEl))
+    productEl.addEventListener("click", () =>
+      handleSelectedProductClick(p.id, productEl),
+    );
     selectedProductsContainer.appendChild(productEl);
-
-  })
-})
+  });
+});
